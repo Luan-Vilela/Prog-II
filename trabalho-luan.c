@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 
 #define MAX_NOME 50
 #define MAX_CAPIVARAS 50
@@ -40,7 +41,7 @@ typedef enum {
 
 
 void cadastraCapivara(int n, int i, Familia familia[MAX_FAMILIA]);
-void cadastraPeso(int m, int id, Familia familia[MAX_FAMILIA]);
+void cadastraPeso(int m, int id, int n, Familia familia[MAX_FAMILIA]);
 void mes(int m);
 
 
@@ -66,7 +67,7 @@ int main(void){
 		scanf("%d", &familia[i].num_meses);
 		setbuf(stdin, NULL);
 		familia[i].num_meses--;							//corrige entrada do usuário com -1
-		cadastraPeso(familia[i].num_meses, i, familia);
+		cadastraPeso(familia[i].num_meses, i, familia[i].num_capis, familia);
 	}
 
 
@@ -75,50 +76,85 @@ int main(void){
 }
 
 /* Função que recebe os dados das capivaras*/
-//@n numero de meses registrados
+//@m numero de meses registrados
 //@id id da familia
+//@n número de membros da família
 //@familia struct
-void cadastraPeso(int m, int id, Familia familia[]){
-	char dados[MAX_NOME+12];
-	char nome[MAX_NOME];
-	memset(nome, 0, MAX_NOME);					// Zera valores da variável nome
-	int i, num, multiplicador = 1;
-	mes(m);
-	//recebe nome e data da capivara
-	scanf("%[^\n]s", dados);
-	setbuf(stdin, NULL);
-
+void cadastraPeso(int m, int id, int n,Familia familia[]){
+	int k;
 	bool chave = true;
-	//Escreve nome da capivara
-	for(i = 0 ; i < strlen(dados); i++){
-		if(dados[i] != ',' && chave){
-			nome[i] = dados[i];
-			num = 0;
+	// imprime  meses
+		mes(m);
+		printf("====================================================: %d\n", n);
+	/* Repete o mesmo mês até acabar os membros da família. */
+	for(k = 0; k <= n; k++){
+		printf("teste-----------------\n");
+		char dados[MAX_NOME+12];
+		char nome[MAX_NOME];
+		memset(nome, 0, MAX_NOME);					// Zera valores da variável nome
+		int i ,j, peso, multiplicador = 1;
+
+		//recebe nome e data da capivara
+		scanf("%[^\n]s", dados);
+		setbuf(stdin, NULL);
+
+
+		j = strlen(dados);
+		//Escreve nome da capivara
+		for(i = 0 ; i < strlen(dados); i++){
+			if(dados[i] != ','){
+				nome[i] = dados[i];
+				peso = 0;
+			}
+			else
+				break;				//sai do for quando achar a virgurla
+		}//fim do for
+		printf("primeiro for: \n");
+		while(j--){
+			if(dados[j] >= 48 && dados[j] <= 57){
+				peso += multiplicador*((int)dados[j] - 48);
+				multiplicador *=10;
+				printf("----------------------------%d %d\n", dados[j], multiplicador);
+			}
+			else if(dados[j] == ',')	//sai do while caso ache uma virgula
+				break;
 		}
-		else{
-			chave = false;
-			if(dados[i] >= 48 && dados[i] <= 57){
-				num += (multiplicador * ((int)dados[i] - 48));
-				multiplicador *= 10;
+		printf("while for: \n");
+
+		printf("\n");
+		/* gatilho, controla se foi encontrado o cadastro da capivara */
+		chave = true;
+		for(i = 0 ; i <= familia[id].num_capis; i++){
+			if(strcmp(familia[id].capis[i].nome, nome) == 0 && chave){
+				chave = false;
+				int aux = peso - familia[id].capis[i].ultimo_peso;
+				/* Faz o calculo da variacao mensal total */
+				if(familia[id].capis[i].var_total != 0)
+					familia[id].capis[i].max_var_mensal =  aux + familia[id].capis[i].var_total;
+				/* faz calculo da variacao do mes */
+				if(familia[id].capis[i].ultimo_peso != 0)
+					familia[id].capis[i].var_total = aux;
+
+				familia[id].capis[i].ultimo_peso = peso;		//salva ultimo peso digitado;
+				
+
+				printf("=>>>>>>>>>>>>>>>>>>>>ultimo valor = >%d\n", familia[id].capis[i].ultimo_peso);
+				printf("=>>>>>>>>>>>>>>>>>>>>variacao mes = >%d\n", familia[id].capis[i].var_total);
+				printf("=>>>>>>>>>>>>>>>>>>>>valor variacao mensal total = >%d\n", familia[id].capis[i].max_var_mensal);
 			}
 		}
-	}//fim do for
-	printf("\n");
-	chave = true;
-	for(i = 0 ; i <= familia[id].num_capis; i++){
-		if(strcmp(familia[id].capis[i].nome, nome) == 0 && chave){
-			chave = false;
-			printf("==========> Existe%s = %d\n", nome, num);
-
+		/* Caso digite errado ou não exista o nome da capivara*/
+		if(chave){
+			printf("%s Nao existe nessa familia %s.\n", nome, familia[id].nome);
+			cadastraPeso(m, id, n, familia);
 		}
-	}
-	if(chave){
-		printf("%s Nao existe nessa na familia %s.\n", nome, familia[id].nome);
-		cadastraPeso(m, id, familia);
-	}
 
+	}//fim do for k
+
+	/* salta para o próximo mês */
 	if(m > 0 && chave == false)
-		cadastraPeso(m-1, id, familia);
+		cadastraPeso(m-1, id, n,familia);
+
 }
 
 
