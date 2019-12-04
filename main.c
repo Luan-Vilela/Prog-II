@@ -5,6 +5,8 @@
 * Professor(a): Diego
 *
 */
+
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -15,6 +17,7 @@
 #define MAX_FAMILIA 50
 
 
+//atualiza
 
 /* Armazena informacoes de uma capivara */
 typedef struct {
